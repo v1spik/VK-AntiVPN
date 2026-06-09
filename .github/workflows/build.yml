@@ -1,0 +1,28 @@
+name: Build iOS Tweak
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download fishhook
+        run: |
+          curl -O https://raw.githubusercontent.com/facebook/fishhook/master/fishhook.h
+          curl -O https://raw.githubusercontent.com/facebook/fishhook/master/fishhook.c
+
+      - name: Compile dylib
+        run: |
+          clang -dynamiclib -arch arm64 -isysroot $(xcrun --sdk iphoneos --show-sdk-path) -framework CoreFoundation -framework CFNetwork -Os -o AntiVPN.dylib AntiVPN.c fishhook.c
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AntiVPN-Tweak
+          path: AntiVPN.dylib
